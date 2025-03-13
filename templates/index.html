@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>File Manager</title>
+</head>
+
+<body class="bg-gray-100 bg-white">
+    <div class="max-w-6xl mx-auto sticky bg-white w-full top-0 z-10 p-8">
+        <h1 class="text-3xl font-bold mb-4 text-gray-800">File Manager</h1>
+
+        <!-- Breadcrumb Navigation -->
+        <div class="mb-4 text-sm text-gray-600">
+            <a href="{% url 'index'  %}" class="text-blue-500 hover:underline">Home</a>
+            {% for i in breadcrumbs %}
+            <span class="mx-2">/</span>
+            <a href="{% url 'folder_view' path=i.path %}" class="text-blue-500 hover:underline">{{ i.name }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- Upload and Create Folder Forms -->
+        <div class="flex items-center gap-4 justify-between flex-col md:flex-row mb-6">
+            <div>
+                <form method="POST" enctype="multipart/form-data" class="flex-grow">
+                    {% csrf_token %}
+                    <div class="flex items-center space-x-2">
+                        <input type="file" name="file" class="border p-2 w-full rounded-lg">
+                        <button type="submit"
+                            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Upload</button>
+                    </div>
+                </form>
+            </div>
+
+            <div>
+                <div class="flex items-center space-x-2">
+                    <button type="submit" onclick="openModal()"
+                        class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"> Create Folder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="max-w-6xl mx-auto  p-6">
+
+
+        <!-- Items Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {% for item in items %}
+            <div class="bg-gray-50 border rounded-lg p-4 flex flex-col items-center hover:shadow-md transition">
+                {% if item.is_folder %}
+                <a href="{% url 'folder_view' path=item.path %}" class="text-blue-600 font-semibold hover:underline">
+                    <img src="https://img.icons8.com/fluency/48/folder-invoices.png" alt="Folder">
+                    <div class="mt-2 text-center truncate w-full" title="{{ item.name }}">
+                        {{ item.name|slice:":15" }}{% if item.name|length > 15 %}...{% endif %}
+                      </div>
+                </a>
+                {% else %}
+                <div class="text-gray-800">
+                    <img src="https://img.icons8.com/fluency/48/file.png" alt="File">
+                    <div class="mt-2 text-center truncate w-full" title="{{ item.name }}">
+                        {{ item.name|slice:":15" }}{% if item.name|length > 15 %}...{% endif %}
+                      </div>
+                </div>
+                {% endif %}
+                <!-- Delete Button -->
+                <form method="GET" class="mt-2">
+                    <input type="hidden" name="delete" value="{{ item.name }}">
+                    <button type="submit" class="text-red-500 hover:underline">Delete</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="folderModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full mx-auto mt-10">
+            <h2 class="text-xl font-bold mb-4 text-center">Create New Folder</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="text" name="folder_name" placeholder="Folder Name"
+                    class="border p-2 rounded-lg w-full mb-4" required>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal()"
+                        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">Cancel</button>
+                    <button type="submit"
+                        class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        function openModal() {
+            document.getElementById('folderModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('folderModal').classList.add('hidden');
+        }
+    </script>
+
+
+    <script>
+        function openModal() {
+            document.getElementById('folderModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('folderModal').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>
