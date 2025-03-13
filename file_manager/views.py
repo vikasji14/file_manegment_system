@@ -3,7 +3,7 @@ from django.http import HttpResponse
 import os
 
 # Set your root path
-ROOT_PATH = "D:/Desktop/react/"
+ROOT_PATH = "D:/Desktop/react"
 
 def index(request, path=""):
     # Combine ROOT_PATH with the provided path
