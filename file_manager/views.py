@@ -42,6 +42,7 @@ def index(request, path=""):
                 os.remove(delete_path)
         return redirect('folder_view', path=path or ROOT_PATH)
     
+    # Download file
     if request.method == 'GET' and 'download' in request.GET:
         download_path = os.path.join(current_path, unquote(request.GET['download']))
         if os.path.exists(download_path) and os.path.isfile(download_path):
@@ -52,6 +53,13 @@ def index(request, path=""):
         else:
             raise Http404("File Not Found")
             
+    # Handle file view
+    if request.method == 'GET' and 'view' in request.GET:
+        view_path = os.path.join(current_path, request.GET['view'])
+        if os.path.exists(view_path) and os.path.isfile(view_path):
+            return FileResponse(open(view_path, 'rb'))
+        else:
+            raise Http404("File not found")
     
     # Get files and folders inside the current path
     items = []

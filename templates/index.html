@@ -49,12 +49,15 @@
             <div
                 class="relative bg-gray-50 border flex rounded-lg p-4 flex flex-col items-center hover:shadow-md transition">
                 <!-- Delete Icon (Top Right) -->
-                <div>
-                    <button type="button" onclick="confirmDelete('{{ item.name }}')"
-                    class="absolute top-2 right-2 text-red-500 hover:text-red-700">
-                    <img src="https://img.icons8.com/ios-glyphs/20/fa5252/trash.png" alt="Delete">
-                </button>
-                </div>
+                <div class="absolute top-2 right-2 group">
+                    <button type="button" onclick="confirmDelete('{{ item.name }}')" class="text-red-500 hover:text-red-700">
+                      <img src="https://img.icons8.com/ios-glyphs/20/fa5252/trash.png" alt="Delete">
+                    </button>
+                    <span class="absolute right-6 top-1 hidden group-hover:inline-block bg-gray-800 text-white text-xs px-2 py-1 rounded-md">
+                      Delete
+                    </span>
+                  </div>
+                  
                 
                 {% if item.is_folder %}
                 <a href="{% url 'folder_view' path=item.path %}" class="text-blue-600 font-semibold hover:underline">
@@ -69,12 +72,25 @@
                     <div class="mt-2 text-center truncate w-full" title="{{ item.name }}">
                         {{ item.name|slice:":15" }}{% if item.name|length > 15 %}...{% endif %}
                     </div>
-                    <!-- <a href="{% url 'download_file' file_path=item.path|urlencode  %}">Download</a> -->
                 </div>
-                <div class="absolute top-9 right-2 text-red-500 hover:text-red-700">
-                <a href="?download={{ item.name|urlencode }}"><img src="https://img.icons8.com/ios-glyphs/20/000000/download--v1.png" alt="Download Icon"></a>
-
-                </div>
+                <div class="absolute top-9 right-2 group">
+                    <a href="?download={{ item.name|urlencode }}">
+                      <img src="https://img.icons8.com/ios-glyphs/20/000000/download--v1.png" alt="Download Icon" class="hover:opacity-80">
+                    </a>
+                    <span class="absolute right-6 top-1 hidden group-hover:inline-block bg-gray-800 text-white text-xs px-2 py-1 rounded-md">
+                      Download
+                    </span>
+                  </div>
+                  
+                  <div class="absolute top-16 right-2 group">
+                    <a href="?view={{ item.name }}" target="_blank">
+                      <img class="" src="https://img.icons8.com/ios-glyphs/20/000000/view-file.png" alt="View Icon" class="hover:opacity-80">
+                    </a>
+                    <span class="absolute right-6 top-1 hidden group-hover:inline-block bg-gray-800 text-white text-xs px-2 py-1 rounded-md">
+                      View
+                    </span>
+                  </div>
+                  
                 {% endif %}
             </div>
             {% endfor %}

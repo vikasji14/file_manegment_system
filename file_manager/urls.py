@@ -5,4 +5,5 @@ urlpatterns = [
     path('', index, name='index'),
     path('<path:path>/', index, name='folder_view'),
     path('download/<path:file_path>/', index, name='download_file'),
-]
+    path('vies/<path:file_path>/', index, name='file_views'),
+] 
