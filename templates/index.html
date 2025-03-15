@@ -47,18 +47,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {% for item in items %}
             <div
-                class="relative bg-gray-50 border rounded-lg p-4 flex flex-col items-center hover:shadow-md transition">
+                class="relative bg-gray-50 border flex rounded-lg p-4 flex flex-col items-center hover:shadow-md transition">
                 <!-- Delete Icon (Top Right) -->
-                <!-- <form method="GET" class="absolute top-4 right-4">
-                    <input type="hidden" name="delete" value="{{ item.name }}">
-                    <button type="submit" class="text-red-400 hover:text-red-900">
-                        <img src="https://img.icons8.com/ios-glyphs/20/fa5252/trash.png" alt="Delete">
-                    </button>
-                </form> -->
-                <button type="button" onclick="confirmDelete('{{ item.name }}')"
+                <div>
+                    <button type="button" onclick="confirmDelete('{{ item.name }}')"
                     class="absolute top-2 right-2 text-red-500 hover:text-red-700">
                     <img src="https://img.icons8.com/ios-glyphs/20/fa5252/trash.png" alt="Delete">
                 </button>
+                </div>
+                
                 {% if item.is_folder %}
                 <a href="{% url 'folder_view' path=item.path %}" class="text-blue-600 font-semibold hover:underline">
                     <img src="https://img.icons8.com/fluency/48/folder-invoices.png" alt="Folder">
@@ -72,6 +69,11 @@
                     <div class="mt-2 text-center truncate w-full" title="{{ item.name }}">
                         {{ item.name|slice:":15" }}{% if item.name|length > 15 %}...{% endif %}
                     </div>
+                    <!-- <a href="{% url 'download_file' file_path=item.path|urlencode  %}">Download</a> -->
+                </div>
+                <div class="absolute top-9 right-2 text-red-500 hover:text-red-700">
+                <a href="?download={{ item.name|urlencode }}"><img src="https://img.icons8.com/ios-glyphs/20/000000/download--v1.png" alt="Download Icon"></a>
+
                 </div>
                 {% endif %}
             </div>

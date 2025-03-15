@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse,FileResponse,Http404
 import os
+from urllib.parse import unquote
 
 # Set your root path
-ROOT_PATH = "D:/Desktop/react"
+ROOT_PATH = "C:/Users/Vikas/Desktop/project"
 
 def index(request, path=""):
     # Combine ROOT_PATH with the provided path
@@ -40,7 +41,18 @@ def index(request, path=""):
             else:
                 os.remove(delete_path)
         return redirect('folder_view', path=path or ROOT_PATH)
-
+    
+    if request.method == 'GET' and 'download' in request.GET:
+        download_path = os.path.join(current_path, unquote(request.GET['download']))
+        if os.path.exists(download_path) and os.path.isfile(download_path):
+        # Open the file and return as attachment
+            response = FileResponse(open(download_path, 'rb'), as_attachment=True)
+            response['Content-Disposition'] = f'attachment; filename="{os.path.basename(download_path)}"'
+            return response
+        else:
+            raise Http404("File Not Found")
+            
+    
     # Get files and folders inside the current path
     items = []
     for item in os.listdir(current_path):
@@ -67,3 +79,4 @@ def index(request, path=""):
         'breadcrumbs': breadcrumbs,
         'current_path': path
     })
+
