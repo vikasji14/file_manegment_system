@@ -23,16 +23,20 @@
 
             <div class="flex items-center gap-4 justify-between flex-col md:flex-row mb-2">
                 <div class="flex flex-col gap-2  space-x-4">
-                    <form method="GET" class="flex items-center space-x-2" onsubmit="formatDatesBeforeSubmit(event)">
+                    <form method="GET" class="flex items-center space-x-2">
                         <label for="start_date" class="text-gray-700 font-medium">From: </label>
-                        <input type="date" name="start_date" id="start_date" value="{{ request.GET.start_date}}"
-                            class="border p-2 rounded-lg">
+                        <input type="date" name="start_date" id="start_date" value="{{ request.GET.start_date }}" class="border p-2 rounded-lg">
+                        
                         <label for="end_date" class="text-gray-700 font-medium">To:</label>
-                        <input type="date" name="end_date" id="end_date" value="{{ request.GET.end_date }}"
-                            class="border p-2 rounded-lg">
-                        <button type="submit"
-                            class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800">Filter</button>
+                        <input type="date" name="end_date" id="end_date" value="{{ request.GET.end_date }}" class="border p-2 rounded-lg">
+                        
+                        <button type="submit" class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800">Filter</button>
+                    
+                        {% if start_date and end_date and items %}
+                            <button type="submit" name="download_all" value="true" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Download All</button>
+                        {% endif %}
                     </form>
+                    
                 </div>
                 <div class="flex justify-end mb-4 relative">
                     <div class="relative">
@@ -241,32 +245,6 @@
                 dropdown.classList.add('hidden');
             }
         });
-
-        function formatDatesBeforeSubmit(event) {
-            event.preventDefault();
-
-            const form = event.target;
-            const startDateInput = form.querySelector('#start_date');
-            const endDateInput = form.querySelector('#end_date');
-
-            const formatDate = (dateStr) => {
-                const [year, month, day] = dateStr.split('-');
-                return `${day}/${month}/${year}`;
-            };
-
-            let actionUrl = new URL(form.action);
-            let params = new URLSearchParams(actionUrl.search);
-
-            if (startDateInput.value) {
-                params.set('start_date', formatDate(startDateInput.value));
-            }
-            if (endDateInput.value) {
-                params.set('end_date', formatDate(endDateInput.value));
-            }
-            window.location.href = `${actionUrl.pathname}?${params.toString()}`;
-        }
-
-
 
     </script>
 </body>
