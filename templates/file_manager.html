@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>File Manager</title>
+</head>
+
+<body class="bg-gray-100">
+    <div class=" mx-auto sticky bg-white w-full top-0 z-10 p-1">
+        <div class="max-w-6xl mx-auto">
+            <h1 class="text-3xl font-bold mb-4 text-gray-800">File Manager</h1>
+    
+            <div class="mb-4 text-sm text-gray-600">
+                <a href="{% url 'index'  %}" class="text-blue-500 hover:underline">Home</a>
+                {% for i in breadcrumbs %}
+                <span class="mx-2">/</span>
+                <a href="{% url 'folder_view' path=i.path %}" class="text-blue-500 hover:underline">{{ i.name }}</a>
+                {% endfor %}
+            </div>
+    
+            <div class="flex items-center gap-4 justify-between flex-col md:flex-row mb-6">
+                <div class="flex flex-col gap-2  space-x-4">
+                    <form method="GET" class="flex items-center space-x-2" onsubmit="formatDatesBeforeSubmit(event)">
+                        <label for="start_date" class="text-gray-700 font-medium">From:</label>
+                        <input type="date" name="start_date" id="start_date" value="{{ request.GET.start_date }}" class="border p-2 rounded-lg">
+                        <label for="end_date" class="text-gray-700 font-medium">To:</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ request.GET.end_date }}" class="border p-2 rounded-lg">
+                        <button type="submit" class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800">Filter</button>
+                    </form>
+                </div>
+                <div class="flex justify-end mb-4 relative">
+                    <div class="relative">
+                        <button onclick="toggleDropdown()" class="bg-gray-300 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-400">Action ▼</button>
+                        <div id="viewDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-lg shadow-lg">
+                            
+                            <button type="submit" onclick="openModal()" class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Create Folder</button>
+                            <div class="border-t"></div>
+                            <button type="submit" onclick="folderUploadModel()" class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Upload File</button>
+                            <button onclick="toggleView('tile')" class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Tiles View</button>
+                            <div class="border-t"></div>
+                            <button onclick="toggleView('table')" class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Table View</button>
+                            <div class="border-t"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+            </div>
+    
+            
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-6">
+        <div id="tile-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {% for item in items %}
+            <div class="relative bg-gray-50 border flex rounded-lg p-4 flex-col items-center hover:shadow-md transition">
+                {% if item.is_folder %}
+                <a href="{% url 'folder_view' path=item.path %}" class="text-blue-600 font-semibold hover:underline">
+                    <img src="https://img.icons8.com/fluency/48/folder-invoices.png" alt="Folder">
+                    <div class="mt-2 text-center truncate w-full" title="{{ item.name }}">
+                        {{ item.name|slice:":15" }}{% if item.name|length > 15 %}...{% endif %}
+                    </div>
+                </a>
+                {% else %}
+                <div class="text-gray-800">
+                    <img src="https://img.icons8.com/fluency/48/file.png" alt="File">
+                    <div class="mt-2 text-center truncate w-full" title="{{ item.name }}">
+                        {{ item.name|slice:":15" }}{% if item.name|length > 15 %}...{% endif %}
+                    </div>
+                </div>
+                <div class="text-sm text-gray-500 mt-2">
+                    <p>Size: {{ item.size }}</p>
+                    <p>Modified: {{ item.last_modified }}</p>
+                </div>
+                <div class="absolute top-4 right-2 group">
+                    <a href="?download={{ item.name|urlencode }}">
+                        <img  src="https://img.icons8.com/material-rounded/20/000000/download--v1.png" width="20" height="20" alt="Download Icon" class="hover:opacity-80">
+                    </a>
+                </div>
+                
+                <div class="absolute top-12 right-2 group">
+                    <a href="?view={{ item.name }}" target="_blank">
+                        <img src="https://img.icons8.com/material-rounded/20/000000/visible.png" alt="View Icon" class="hover:opacity-80">
+                    </a>
+                </div>
+                
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div id="table-view" class="hidden">
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead>
+                    <tr class="w-full bg-gray-100 text-gray-700">
+                        <th class="py-2 px-4 border cursor-pointer" onclick="openNameSearch()">Name</th>
+                        <th class="py-2 px-4 border cursor-pointer" onclick="openSizeFilter()">Size</th>
+                        <th class="py-2 px-4 border cursor-pointer" onclick="openDateFilter()">Modified</th>
+                        <th class="py-2 px-4 border">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="border">
+                        <td class="py-2 px-4 border">{{ item.name }}</td>
+                        <td class="py-2 px-4 border">{{ item.size }}</td>
+                        <td class="py-2 px-4 border">{{ item.last_modified }}</td>
+                        <td class="py-2 px-4 border space-x-2">
+                            <a href="?download={{ item.name|urlencode }}" class="text-blue-500 hover:underline">Download</a>
+                            <a href="?view={{ item.name }}" target="_blank" class="text-green-500 hover:underline">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+ <!-- Modal -->
+ <div id="folderModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-auto mt-10">
+        <h2 class="text-xl font-bold mb-4 text-start">Create New Folder</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="folder_name" placeholder="Folder Name" class="border p-2 rounded-lg w-full mb-4" required>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeModal()" class="bg-gray-200 text-gray-700 px-4 py-2 hover:bg-gray-400 rounded-lg">Cancel</button>
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="uploadModel" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-auto mt-10">
+        <h2 class="text-xl font-bold mb-4 text-start"> Choose File</h2>
+        <form method="POST" enctype="multipart/form-data" class="flex-grow">
+            {% csrf_token %}
+            <div class="flex items-center flex-col gap-4 space-x-2">
+                <input type="file" name="file" class="border p-2 w-full rounded-lg">
+                <div class="flex justify-end items-end gap-4 space-x-2">
+                    <button type="button" onclick="uploadModelClose()" class="bg-gray-200 text-gray-700 px-4 py-2 hover:bg-gray-400 rounded-lg">Cancel</button>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Upload</button>
+        
+                </div>
+            </div>
+        </form>
+      
+    </div>
+</div>
+
+
+
+    <script>
+       
+        
+        function folderUploadModel() {
+            document.getElementById('uploadModel').classList.remove('hidden');
+        }
+        function uploadModelClose() {
+            document.getElementById('uploadModel').classList.add('hidden');
+        }
+        function openModal() {
+            document.getElementById('folderModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('folderModal').classList.add('hidden');
+        }
+        function toggleView(view) {
+            document.getElementById('tile-view').classList.toggle('hidden', view !== 'tile');
+            document.getElementById('table-view').classList.toggle('hidden', view !== 'table');
+        }
+        function openNameSearch() {
+            const search = prompt('Enter name to search:');
+            if (search) window.location.href = `?search=${encodeURIComponent(search)}`;
+        }
+        function openSizeFilter() {
+            const size = prompt('Enter size to filter (e.g., >100KB):');
+            if (size) window.location.href = `?size=${encodeURIComponent(size)}`;
+        }
+        function openDateFilter() {
+            const date = prompt('Enter date to filter (YYYY-MM-DD):');
+            if (date) window.location.href = `?date=${encodeURIComponent(date)}`;
+        }
+        function toggleDropdown() {
+            const dropdown = document.getElementById('viewDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+        document.addEventListener('click', function (e) {
+            const dropdown = document.getElementById('viewDropdown');
+            if (!e.target.closest('[onclick="toggleDropdown()"], #viewDropdown')) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        function formatDatesBeforeSubmit(event) {
+            event.preventDefault();  // Prevent immediate form submission
+        
+            const form = event.target;
+            const startDateInput = form.querySelector('#start_date');
+            const endDateInput = form.querySelector('#end_date');
+            
+            const formatDate = (dateStr) => {
+                const [year, month, day] = dateStr.split('-');
+                return `${day}/${month}/${year}`;
+            };
+        
+            // Extract current form action URL (assuming it's a GET request)
+            let actionUrl = new URL(form.action);
+            let params = new URLSearchParams(actionUrl.search);
+        
+            // Append formatted dates to the URL
+            if (startDateInput.value) {
+                params.set('start_date', formatDate(startDateInput.value));
+            }
+            if (endDateInput.value) {
+                params.set('end_date', formatDate(endDateInput.value));
+            }
+        
+            // Redirect to the updated URL with parameters
+            window.location.href = `${actionUrl.pathname}?${params.toString()}`;
+        }
+        
+    </script>
+</body>
+
+</html>
