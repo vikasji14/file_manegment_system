@@ -6,7 +6,7 @@ from datetime import datetime,timedelta
 
 # Set your root path
 # ROOT_PATH = "D:/Desktop/ativiti/data"
-ROOT_PATH = "C:/Users/vikas/Downloads/old_data"
+ROOT_PATH = "C:/Users/Vikas/AppData"
 UPLOAD_DIR = os.path.join(ROOT_PATH, 'uploads')
 
 def index(request, path=""):
@@ -19,13 +19,17 @@ def index(request, path=""):
 
     if request.method == 'POST':
         if 'file' in request.FILES:
-            uploaded_file = request.FILES['file']
+            files = request.FILES.getlist('file')  # Get all uploaded files
             os.makedirs(UPLOAD_DIR, exist_ok=True)
-            file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
-            with open(file_path, 'wb+') as destination:
-                for chunk in uploaded_file.chunks():
-                    destination.write(chunk)
+                
+            for uploaded_file in files:
+                file_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
+                with open(file_path, 'wb+') as destination:
+                    for chunk in uploaded_file.chunks():
+                        destination.write(chunk)
+                
             return redirect('folder_view', path=path) if path else redirect('/')
+
 
         if 'folder_name' in request.POST:
             folder_name = request.POST['folder_name']
@@ -74,7 +78,7 @@ def index(request, path=""):
             end_dt = datetime.strptime(end_date, '%d/%m/%Y')
             end_dt += timedelta(days=1) - timedelta(seconds=1)
 
-# Compare only the date parts
+            # Compare only the date parts
             if not (start_dt <= last_modified <= end_dt):
                 continue
 
@@ -106,10 +110,13 @@ def index(request, path=""):
                 'name': part,
                 'path': "/".join(parts[:i + 1])
             })
-    return render(request, 'file_manager.html', {
+    total_items = len(items)
+    
+    return render(request, 'file_manegement.html', {
         'items': items,
         'breadcrumbs': breadcrumbs,
         'current_path': path,
         'start_date': start_date,
-        'end_date': end_date
+        'end_date': end_date,
+        'total_items':total_items,
     })

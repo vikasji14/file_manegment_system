@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>DX1 File Manager</title>
+</head>
+
+<body class="bg-gray-100">
+    <div class=" mx-auto sticky bg-white w-full top-0 z-10 p-1">
+        <div class="max-w-6xl mx-auto">
+            <p class="text-xl font-bold mb-2 text-gray-800">File Manager</p>
+
+            <div class="mb-4 text-sm text-gray-600">
+                <a href="{% url 'index'  %}" class="text-blue-500 hover:underline">Home</a>
+                {% for i in breadcrumbs %}
+                <span class="mx-1">/</span>
+                <a href="{% url 'folder_view' path=i.path %}" class="text-blue-500 hover:underline">{{ i.name }}</a>
+                {% endfor %}
+            </div>
+
+            <div class="flex items-center gap-4 justify-between flex-col md:flex-row mb-2">
+                <div class="flex flex-col gap-2  space-x-4">
+                    <form method="GET" class="flex items-center space-x-2" onsubmit="formatDatesBeforeSubmit(event)">
+                        <label for="start_date" class="text-gray-700 font-medium">From: </label>
+                        <input type="date" name="start_date" id="start_date" value="{{ request.GET.start_date}}"
+                            class="border p-2 rounded-lg">
+                        <label for="end_date" class="text-gray-700 font-medium">To:</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ request.GET.end_date }}"
+                            class="border p-2 rounded-lg">
+                        <button type="submit"
+                            class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800">Filter</button>
+                    </form>
+                </div>
+                <div class="flex justify-end mb-4 relative">
+                    <div class="relative">
+                        <button onclick="toggleDropdown()"
+                            class="bg-gray-300 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-400">Action ▼</button>
+                        <div id="viewDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-lg shadow-lg">
+
+                            <button type="submit" onclick="openModal()"
+                                class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Create
+                                Folder</button>
+                            <button type="submit" onclick="folderUploadModel()"
+                                class="block w-full border-t text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Upload
+                                File</button>
+                            <button onclick="toggleView('tile')"
+                                class="block border-t w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Tiles
+                                View</button>
+                            
+                            <button onclick="toggleView('table')"
+                                class="block w-full border-t text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Table
+                                View</button>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-2">
+        <div id="tile-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {% if items %}
+                {% for item in items %}
+                    <div class="relative bg-gray-50 border flex rounded-lg p-4 flex-col items-center hover:shadow-md transition">
+                        {% if item.is_folder %}
+                            <a href="{% url 'folder_view' path=item.path %}" class="text-blue-600 font-semibold hover:underline">
+                                <img src="https://img.icons8.com/fluency/48/folder-invoices.png" alt="Folder">
+                                <div class="mt-2 text-center truncate w-full" title="{{ item.name }}">
+                                    {{ item.name|slice:":15" }}{% if item.name|length > 15 %}...{% endif %}
+                                </div>
+                            </a>
+                        {% else %}
+                            <div class="text-gray-800">
+                                <img src="https://img.icons8.com/fluency/48/file.png" alt="File">
+                                <div class="mt-2 text-center truncate w-full" title="{{ item.name }}">
+                                    {{ item.name|slice:":15" }}{% if item.name|length > 15 %}...{% endif %}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2">
+                                <p>Size: {{ item.size }}</p>
+                                <p>Modified: {{ item.last_modified }}</p>
+                            </div>
+                            <div class="absolute top-4 right-2 group">
+                                <a href="?download={{ item.name|urlencode }}">
+                                    <img src="https://img.icons8.com/material-rounded/20/000000/download--v1.png" width="20" height="20" alt="Download Icon" class="hover:opacity-80">
+                                </a>
+                                <span class="absolute -left-16 top-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 bg-black text-white text-xs rounded px-2 py-1 transition-all duration-150">
+                                    Download
+                                </span>
+                            </div>
+        
+                            <div class="absolute top-12 right-2 group">
+                                <a href="?view={{ item.name }}" target="_blank">
+                                    <img src="https://img.icons8.com/material-rounded/20/000000/visible.png" width="20" height="20" alt="View Icon" class="hover:opacity-80">
+                                </a>
+                                <span class="absolute -left-10 top-1/2 -translate-y-1/2 scale-0 group-hover:scale-100 bg-black text-white text-xs rounded px-2 py-1 transition-all duration-150">
+                                    View
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-1 md:col-span-2 lg:col-span-4 text-center text-gray-500 p-6">
+                    No files available.
+                </div>
+            {% endif %}
+        </div>
+        
+
+        <div id="table-view" class="hidden">
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead>
+                    <tr class="w-full bg-gray-100 text-gray-700">
+                        <th class="py-2 px-4 border cursor-pointer">Name</th>
+                        <th class="py-2 px-4 border cursor-pointer">Size</th>
+                        <th class="py-2 px-4 border cursor-pointer">Modified</th>
+                        <th class="py-2 px-4 border">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if items %}
+                        {% for item in items %}
+                            {% if not item.is_folder %}
+                                <tr class="{% cycle 'bg-gray-100' 'bg-white' %} border">
+                                    <td class="py-2 px-4 border">
+                                        {{ item.name|slice:":50" }}{% if item.name|length > 50 %}...{% endif %}
+                                    </td>
+                                    <td class="py-2 px-4 border">{{ item.size }}</td>
+                                    <td class="py-2 px-4 border">{{ item.last_modified }}</td>
+                                    <td class="py-2 px-4 flex items-center justify-center gap-4 border">
+                                        <!-- Download Button with Tooltip -->
+                                        <div class="relative group">
+                                            <a href="?download={{ item.name|urlencode }}">
+                                                <img src="https://img.icons8.com/material-rounded/20/000000/download--v1.png"
+                                                    width="20" height="20" alt="Download Icon" class="hover:opacity-80">
+                                            </a>
+                                            <span
+                                                class="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 bg-black text-white text-xs rounded px-2 py-1 transition-all duration-150">
+                                                Download
+                                            </span>
+                                        </div>
+        
+                                        <!-- View Button with Tooltip -->
+                                        <div class="relative group">
+                                            <a href="?view={{ item.name }}" target="_blank">
+                                                <img src="https://img.icons8.com/material-rounded/20/000000/visible.png" width="20"
+                                                    height="20" alt="View Icon" class="hover:opacity-80">
+                                            </a>
+                                            <span
+                                                class="absolute -top-8 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 bg-black text-white text-xs rounded px-2 py-1 transition-all duration-150">
+                                                View
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-gray-500">No files available.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    <!-- Modal -->
+    <div id="folderModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-auto mt-10">
+            <h2 class="text-xl font-bold mb-4 text-start">Create New Folder</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="text" name="folder_name" placeholder="Folder Name"
+                    class="border p-2 rounded-lg w-full mb-4" required>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal()"
+                        class="bg-gray-200 text-gray-700 px-4 py-2 hover:bg-gray-400 rounded-lg">Cancel</button>
+                    <button type="submit"
+                        class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="uploadModel" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-auto mt-10">
+            <h2 class="text-xl font-bold mb-4 text-start"> Choose File</h2>
+            <form method="POST" enctype="multipart/form-data" class="flex-grow">
+                {% csrf_token %}
+                <div class="flex items-center flex-col gap-4 space-x-2">
+                    <input type="file" name="file" multiple class="border p-2 w-full rounded-lg">
+                    <div class="flex justify-end items-end gap-4 space-x-2">
+                        <button type="button" onclick="uploadModelClose()" class="bg-gray-200 text-gray-700 px-4 py-2 hover:bg-gray-400 rounded-lg">Cancel</button>
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Upload</button>
+                    </div>
+                </div>
+            </form>
+            
+
+        </div>
+    </div>
+
+
+
+    <script>
+
+
+        function folderUploadModel() {
+            document.getElementById('uploadModel').classList.remove('hidden');
+        }
+        function uploadModelClose() {
+            document.getElementById('uploadModel').classList.add('hidden');
+        }
+        function openModal() {
+            document.getElementById('folderModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('folderModal').classList.add('hidden');
+        }
+        function toggleView(view) {
+            document.getElementById('tile-view').classList.toggle('hidden', view !== 'tile');
+            document.getElementById('table-view').classList.toggle('hidden', view !== 'table');
+        }
+        function toggleDropdown() {
+            const dropdown = document.getElementById('viewDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+        document.addEventListener('click', function (e) {
+            const dropdown = document.getElementById('viewDropdown');
+            if (!e.target.closest('[onclick="toggleDropdown()"], #viewDropdown')) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        function formatDatesBeforeSubmit(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const startDateInput = form.querySelector('#start_date');
+            const endDateInput = form.querySelector('#end_date');
+
+            const formatDate = (dateStr) => {
+                const [year, month, day] = dateStr.split('-');
+                return `${day}/${month}/${year}`;
+            };
+
+            let actionUrl = new URL(form.action);
+            let params = new URLSearchParams(actionUrl.search);
+
+            if (startDateInput.value) {
+                params.set('start_date', formatDate(startDateInput.value));
+            }
+            if (endDateInput.value) {
+                params.set('end_date', formatDate(endDateInput.value));
+            }
+            window.location.href = `${actionUrl.pathname}?${params.toString()}`;
+        }
+
+
+
+    </script>
+</body>
+
+</html>
