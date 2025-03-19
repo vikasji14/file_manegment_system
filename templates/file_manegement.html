@@ -42,22 +42,25 @@
                     <div class="relative">
                         <button onclick="toggleDropdown()"
                             class="bg-gray-300 text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-400">Action ▼</button>
-                        <div id="viewDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-lg shadow-lg">
-
-                            <button type="submit" onclick="openModal()"
-                                class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Create
-                                Folder</button>
-                            <button type="submit" onclick="folderUploadModel()"
-                                class="block w-full border-t text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Upload
-                                File</button>
-                            <button onclick="toggleView('tile')"
-                                class="block border-t w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Tiles
-                                View</button>
+                            <form method="GET">
+                                <div id="viewDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-lg shadow-lg">
+                                    <button type="button" onclick="openModal()"
+                                        class="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Create Folder</button>
+                                    <button type="button" onclick="folderUploadModel()"
+                                        class="block w-full border-t text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Upload File</button>
+                                    <button type="button" onclick="toggleView('tile')"
+                                        class="block border-t w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Tiles View</button>
+                                    <button type="button" onclick="toggleView('table')"
+                                        class="block w-full border-t text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Table View</button>
                             
-                            <button onclick="toggleView('table')"
-                                class="block w-full border-t text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Table
-                                View</button>
-                        </div>
+                                    <!-- Sorting Buttons Inside the Form -->
+                                    <button type="submit" name="sort_by" value="oldest"
+                                        class="block w-full border-t text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Sort by Oldest</button>
+                                    <button type="submit" name="sort_by" value="newest"
+                                        class="block w-full border-t text-left px-4 py-2 text-gray-800 hover:bg-gray-200">Sort by Newest</button>
+                                </div>
+                            </form>
+                            
                     </div>
                 </div>
 
